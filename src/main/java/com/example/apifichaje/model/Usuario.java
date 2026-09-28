@@ -17,8 +17,6 @@ public class Usuario {
     private String nombre;
     @Column(unique = true)
     private String codigo;
-    @OneToMany(mappedBy = "usuario") //Hace referencia al campo creado en la clase Fichaje
-    private List<Fichaje> fichajes = new ArrayList<>();
 
     public Usuario(String nombre, String codigo) {
         this.nombre = nombre;
