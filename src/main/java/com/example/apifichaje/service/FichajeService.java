@@ -28,7 +28,7 @@ public class FichajeService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Fichaje ficharEntrada(String codigo) {
+    public ListadoFichajesDto ficharEntrada(String codigo) {
 
         Optional<Usuario> user = usuarioRepository.findByCodigo(codigo);
 
@@ -50,7 +50,7 @@ public class FichajeService {
             repo.save(newFichaje);
 
 
-            return newFichaje;
+            return convertirADto(newFichaje);
 
 
         }
@@ -58,7 +58,7 @@ public class FichajeService {
     }
 
 
-    public Fichaje ficharSalida(String codigo) {
+    public ListadoFichajesDto ficharSalida(String codigo) {
 
         Optional<Usuario> user = usuarioRepository.findByCodigo(codigo);
 
@@ -76,11 +76,11 @@ public class FichajeService {
             ficharsalida.setFechaHoraSalida(LocalDateTime.now());
             repo.save(ficharsalida);
 
-            return ficharsalida;
+            return convertirADto(ficharsalida);
         }
     }
 
-    public Fichaje fichajeManual(String codigo, LocalDateTime fechaHoraEntrada, LocalDateTime fechaHoraSalida) {
+    public ListadoFichajesDto fichajeManual(String codigo, LocalDateTime fechaHoraEntrada, LocalDateTime fechaHoraSalida) {
         if (fechaHoraEntrada != null && fechaHoraSalida != null && fechaHoraEntrada.isBefore(fechaHoraSalida)) {
 
             Optional<Usuario> user = usuarioRepository.findByCodigo(codigo);
@@ -97,7 +97,7 @@ public class FichajeService {
                 fichar.setFechaHoraEntrada(fechaHoraEntrada);
                 fichar.setFechaHoraSalida(fechaHoraSalida);
                 repo.save(fichar);
-                return fichar;
+                return convertirADto(fichar);
             }
         } else {
             throw new RuntimeException("FechaHoraEntrada o FechaHoraSalida no valido");
@@ -118,23 +118,7 @@ public class FichajeService {
 
         for (Fichaje fichaje : list) {
 
-            LocalDateTime fin;
-
-            if (fichaje.getFechaHoraSalida() != null) {
-                fin = fichaje.getFechaHoraSalida();
-            } else {
-                fin = LocalDateTime.now();
-            }
-
-            Long id = fichaje.getId();
-            LocalDateTime fechaHoraEntrada = fichaje.getFechaHoraEntrada();
-            Duration duracion = Duration.between(fechaHoraEntrada, fin);
-            Long totalMinutos = duracion.toMinutes();
-
-            ListadoFichajesDto lista = new ListadoFichajesDto(id, fechaHoraEntrada, fichaje.getFechaHoraSalida(), totalMinutos);
-            listadoFichajesDto.add(lista);
-
-
+            listadoFichajesDto.add(convertirADto(fichaje));
         }
         return listadoFichajesDto;
     }
@@ -153,6 +137,24 @@ public class FichajeService {
         return null;
 
 
+    }
+
+    private ListadoFichajesDto convertirADto(Fichaje fichaje) {
+        LocalDateTime fin;
+
+        if (fichaje.getFechaHoraSalida() != null) {
+            fin = fichaje.getFechaHoraSalida();
+        } else {
+            fin = LocalDateTime.now();
+        }
+
+        Long id = fichaje.getId();
+        LocalDateTime fechaHoraEntrada = fichaje.getFechaHoraEntrada();
+        Duration duracion = Duration.between(fechaHoraEntrada, fin);
+        Long totalMinutos = duracion.toMinutes();
+
+        ListadoFichajesDto lista = new ListadoFichajesDto(id, fechaHoraEntrada, fichaje.getFechaHoraSalida(), totalMinutos);
+        return lista;
     }
 
 
